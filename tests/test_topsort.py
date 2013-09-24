@@ -1,5 +1,7 @@
+from topsort.errors import CyclicGraphError
 from topsort.network import Network
 from topsort.node import Node
+from nose.tools import assert_raises
 
 
 
@@ -32,3 +34,21 @@ def test_basic_sort():
     assert [x.data for x in network.sort()] == [3, 5, 7, 8, 11, 10, 9, 2,]
     # The implementation is deterministic, so we can assert order here, since
     # we know the order that nodes are added.
+
+
+def test_cycle():
+    """ Ensure that we throw a cycle error. """
+
+    NODES = {x: Node(x) for x in [1, 2]}
+    EDGES = [
+        (1, 2),
+        (2, 1),
+    ]
+
+    network = Network()
+
+    for fro, to in EDGES:
+        network.add_edge(NODES[fro], NODES[to])
+
+    with assert_raises(CyclicGraphError):
+        assert [x.data for x in network.sort()] == [3, 5, 7, 8, 11, 10, 9, 2,]
